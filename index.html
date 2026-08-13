@@ -13,7 +13,8 @@
      =================================================== -->
 <section class="frame" id="frame-1a" data-frame="1a">
   <div class="page title-page">
-    <h1 class="headline">What I got wrong about the size of the meteorites</h1>
+    <h1 class="headline">Weight Expectations</h1>
+    <h2 class="subhead">A data analysis of meteorite mass, and why most space rocks are smaller than you'd think.</h2>
     <p class="scroll-hint">scroll</p>
   </div>
 </section>
@@ -24,10 +25,11 @@
 <section class="frame" id="frame-1b" data-frame="1b">
   <div class="page">
     <div class="beat">
-      <p>When I was a kid, I learned about the meteorite that wiped out the dinosaurs. Ever since, that's what "meteorite" has meant to me — a world-ending boulder crashing down in fire.<br>Is that what most meteorites actually look like?</p>
+      <p>Most of us grew up learning about the legendary impactor that wiped out the dinosaurs.Etched in our minds as a colossal, world-ending boulder crashing down in fire. For a long time, that single apocalyptic image defined what the word 'meteorite' meant to me.If someone were to ask me how big I think a meteorite is, I probably wouldn't have an answer. But how big are space rocks actually? If you assume they are all massive mountain-sized catastrophes, your mental scale is probably as skewed as mine is. 
+      <p>This data narrative explores the true mass distribution of meteorites, and why the reality of space debris is much smaller and stranger than we think.</p>
     </div>
     <div class="beat">
-      <p>Before I answer that, let's back up. What actually is a meteorite?</p>
+      <p>Before we dive into the data, let's back up. What actually is a meteorite?</p>
     </div>
 
     <!-- illustration placeholder — swap for your real image later -->
@@ -46,9 +48,9 @@
 <section class="frame frame-scrolly" id="frame-2" data-frame="2">
 
   <div class="scrolly-visual">
-    <div class="visual-state" data-state="meteoroid">[ image: meteoroid ]</div>
-    <div class="visual-state" data-state="meteor">[ image: meteor ]</div>
-    <div class="visual-state" data-state="meteorite">[ image: meteorite ]</div>
+    <div class="visual-state" data-state="meteoroid"><img src="assets/images/meteoroid.png" alt="A meteoroid drifting in space"></div>
+    <div class="visual-state" data-state="meteor"><img src="assets/images/meteor.png" alt="A meteor burning in Earth's atmosphere"></div>
+    <div class="visual-state" data-state="meteorite"><img src="assets/images/meteorite.png" alt="A meteorite on the ground"></div>
   </div>
 
   <div class="scrolly-text">
@@ -86,7 +88,7 @@
 
         <div class="carousel-slide">
           <div class="sticky-note">Massive rocks.</div>
-          <div class="carousel-image">[ image: massive historic meteorite photo ]</div>
+          <div class="carousel-image"><img src="assets/images/Hobo.jpg" alt="A massive historic meteorite"></div>
           <p class="image-source">Source: [url]</p>
         </div>
 
@@ -129,7 +131,6 @@
      =================================================== -->
 <section class="frame" id="frame-3" data-frame="3">
   <div class="page">
-    <div class="eyebrow">Fig. 3 — Before I looked</div>
 
     <div class="beat">
       <p>Massive rocks. Museum-piece boulders. Things that leave craters.</p>
@@ -187,8 +188,6 @@
       <button id="check-results-btn" class="check-results-btn">Check results →</button>
 
     </div>
-
-    <div class="page-number">3</div>
   </div>
 </section>
 
@@ -240,13 +239,16 @@
       </div>
 
     </div>
-
-    <div class="page-number">4</div>
   </div>
 </section>
 
 <!-- ===================================================
      FRAME 5 — The Mechanism + The Bookend
+     Independent second chart, zoomed to the smallest-to-Brick
+     range only — same visual language as Frame 4 (same axis
+     style, same card position) so the transition READS as
+     "same graph, zoomed in," even though it's technically a
+     separate canvas, not a shared/animated one.
      =================================================== -->
 <section class="frame" id="frame-5" data-frame="5">
   <div class="page">
@@ -260,8 +262,35 @@
       <p>So — is that what most meteorites actually look like? Not even close.</p>
     </div>
 
-    <div class="stat-highlight">
-      <p><strong id="brick-pct">—</strong>% of recorded meteorites are lighter than a brick.</p>
+    <div class="histogram-section">
+
+      <div class="histogram-main">
+        <p class="axis-label-y">Number of meteorites</p>
+        <canvas id="mass-histogram-zoom"></canvas>
+        <div class="axis-baseline-h"></div>
+        <div class="axis-ticks-h" id="axis-ticks-zoom">
+          <!-- filled by story.js — this chart's range is much
+               narrower than Frame 4's, so it needs its own
+               tick values, not the same 10^-2...10^8 spread -->
+        </div>
+        <p class="axis-label-x">Mass (grams, log scale)</p>
+      </div>
+
+      <!-- same class, same absolute positioning as Frame 4's
+           card — reusing .guess-callout is what guarantees
+           this lands in the exact same screen position -->
+      <div class="guess-callout is-visible" id="brick-callout">
+        <p><strong id="brick-pct-2">—</strong>% of recorded meteorites are lighter than a brick.</p>
+      </div>
+
+    </div>
+
+    <p class="chart-hint">Click the leftmost bar to see the smallest meteorite ever recorded.</p>
+
+    <!-- small popup, hidden until the leftmost bar is clicked -->
+    <div class="smallest-popup" id="smallest-popup">
+      <p><strong>LaPaz Icefield 04531</strong></p>
+      <p>0.01 g — the lightest meteorite ever recorded.</p>
     </div>
 
     <div class="beat">

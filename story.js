@@ -293,6 +293,175 @@ fetch('data/data.csv')
   });
 
 // ---------------------------------------------------------
+// FRAME 5 — the SAME chart as Frame 4 (same full range, same
+// bins — literally reuses binCounts/maxBinCount computed for
+// Frame 4, not a separate calculation). The only differences:
+// bars lighter than "Brick" are colored, the rest stay gray,
+// and a labeled arrow points at the smallest recorded specimen.
+// ---------------------------------------------------------
+
+const zoomCanvas = document.getElementById('mass-histogram-zoom');
+const zoomCtx = zoomCanvas.getContext('2d');
+const BRICK_G = referencePoints['ref-brick']; // 2000g — same threshold used everywhere
+
+function resizeZoomCanvas() {
+  const dpr = window.devicePixelRatio || 1;
+  const rect = zoomCanvas.getBoundingClientRect();
+  zoomCanvas.width = rect.width * dpr;
+  zoomCanvas.height = rect.height * dpr;
+  zoomCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+
+function buildZoomAxisTicks() {
+  const ticksEl = document.getElementById('axis-ticks-zoom');
+  ticksEl.innerHTML = '';
+  [-2, 0, 2, 4, 6, 8].forEach(exp => {
+    const span = document.createElement('span');
+    span.innerHTML = `10<sup>${exp}</sup>`;
+    ticksEl.appendChild(span);
+  });
+}
+
+// which grams-value a bin's CENTER represents, on the full
+// logMin/logMax scale (same one Frame 4 uses) — used to decide
+// whether that bar counts as "lighter than a brick"
+function binCenterGrams(binIndex) {
+  const t = (binIndex + 0.5) / BIN_COUNT;
+  const logVal = logMin + t * (logMax - logMin);
+  return Math.pow(10, logVal);
+}
+
+function drawColoredChart(upToBin) {
+  const rect = zoomCanvas.getBoundingClientRect();
+  const w = rect.width, h = rect.height;
+  const leftPad = 44;
+  const chartW = w - leftPad;
+  zoomCtx.clearRect(0, 0, w, h);
+
+  // y-axis numbers — same maxBinCount Frame 4 already computed
+  zoomCtx.fillStyle = '#888';
+  zoomCtx.font = '11px Helvetica, Arial, sans-serif';
+  zoomCtx.textAlign = 'right';
+  zoomCtx.textBaseline = 'middle';
+  for (let i = 0; i <= 4; i++) {
+    const value = Math.round((maxBinCount / 4) * i);
+    const y = h - (i / 4) * (h - 10);
+    zoomCtx.fillText(value.toLocaleString(), leftPad - 8, y);
+  }
+
+  // bars — colored teal if lighter than a brick, gray otherwise
+  const barW = chartW / BIN_COUNT;
+  for (let i = 0; i <= upToBin && i < BIN_COUNT; i++) {
+    const barH = maxBinCount ? (binCounts[i] / maxBinCount) * (h - 10) : 0;
+    zoomCtx.fillStyle = (binCenterGrams(i) < BRICK_G) ? '#3F6B6B' : '#ddd';
+    zoomCtx.fillRect(leftPad + i * barW + 1, h - barH, barW - 2, barH);
+  }
+
+  // Brick reference line, for orientation (same position Frame 4 shows it at)
+  zoomCtx.strokeStyle = '#E85D9C';
+  zoomCtx.lineWidth = 1;
+  zoomCtx.setLineDash([4, 3]);
+  const brickX = leftPad + (gramsToPercent(BRICK_G) / 100) * chartW;
+  zoomCtx.beginPath();
+  zoomCtx.moveTo(brickX, 12);
+  zoomCtx.lineTo(brickX, h);
+  zoomCtx.stroke();
+  zoomCtx.setLineDash([]);
+  zoomCtx.fillStyle = '#333';
+  zoomCtx.font = '10px Helvetica, Arial, sans-serif';
+  zoomCtx.textAlign = 'center';
+  zoomCtx.textBaseline = 'bottom';
+  zoomCtx.fillText('Brick (2kg)', brickX, 10);
+
+  // arrow + label pointing at the leftmost bar (smallest specimen)
+  if (upToBin >= BIN_COUNT - 1) {
+    const barX = leftPad + barW / 2; // center of the first bar
+    const labelX = leftPad + 90;
+    const labelY = 40;
+
+    zoomCtx.strokeStyle = '#1C1C1C';
+    zoomCtx.lineWidth = 1.5;
+    zoomCtx.beginPath();
+    zoomCtx.moveTo(labelX, labelY);
+    zoomCtx.lineTo(barX + 6, labelY + 24);
+    zoomCtx.stroke();
+
+    // arrowhead
+    zoomCtx.beginPath();
+    zoomCtx.moveTo(barX + 6, labelY + 24);
+    zoomCtx.lineTo(barX + 1, labelY + 16);
+    zoomCtx.lineTo(barX + 11, labelY + 18);
+    zoomCtx.closePath();
+    zoomCtx.fillStyle = '#1C1C1C';
+    zoomCtx.fill();
+
+    zoomCtx.fillStyle = '#1C1C1C';
+    zoomCtx.font = 'bold 11px Helvetica, Arial, sans-serif';
+    zoomCtx.textAlign = 'left';
+    zoomCtx.textBaseline = 'bottom';
+    zoomCtx.fillText('Smallest ever recorded:', labelX, labelY - 4);
+    zoomCtx.font = '11px Helvetica, Arial, sans-serif';
+    zoomCtx.fillText('LaPaz Icefield 04531 — 0.01g', labelX, labelY + 10);
+  }
+}
+
+let zoomRevealed = false;
+let frame5InView = false;
+
+function startZoomReveal() {
+  if (zoomRevealed || !frame5InView || binCounts.length === 0) return;
+  zoomRevealed = true;
+
+  resizeZoomCanvas();
+  buildZoomAxisTicks();
+
+  let bin = 0;
+  function revealNext() {
+    drawColoredChart(bin);
+    bin++;
+    if (bin < BIN_COUNT) {
+      const progress = bin / BIN_COUNT;
+      const delay = 40 * (1 - progress) + 4;
+      setTimeout(revealNext, delay);
+    } else {
+      drawColoredChart(BIN_COUNT); // final frame — triggers the arrow to draw too
+    }
+  }
+  revealNext();
+}
+
+const frame5Observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      frame5InView = true;
+      startZoomReveal();
+    }
+  });
+}, { threshold: 0.4 });
+
+frame5Observer.observe(document.getElementById('frame-5'));
+
+// click-to-reveal the smallest specimen's popup — the arrow
+// already labels it, this is just a bonus interaction
+zoomCanvas.addEventListener('click', (event) => {
+  const rect = zoomCanvas.getBoundingClientRect();
+  const clickX = event.clientX - rect.left;
+  const leftPad = 44;
+  const barW = (rect.width - leftPad) / BIN_COUNT;
+
+  if (clickX >= leftPad && clickX <= leftPad + barW) {
+    document.getElementById('smallest-popup').classList.add('is-visible');
+  }
+});
+
+window.addEventListener('resize', () => {
+  if (zoomRevealed) {
+    resizeZoomCanvas();
+    drawColoredChart(BIN_COUNT);
+  }
+});
+
+// ---------------------------------------------------------
 // FRAME 5 & 6 — stats computed once from the real data:
 // brick %, the median, and how many times heavier Hoba is
 // than that median. No IntersectionObserver needed here —
@@ -316,7 +485,7 @@ function updateFrame5And6() {
   const brickThreshold = referencePoints['ref-brick']; // reuse the SAME 2000g value used everywhere else
   const lighterThanBrick = allMasses.filter(g => g < brickThreshold).length;
   const brickPct = Math.round((lighterThanBrick / allMasses.length) * 100);
-  document.getElementById('brick-pct').textContent = brickPct;
+  document.getElementById('brick-pct-2').textContent = brickPct;
 
   // --- Frame 6: median vs. Hoba ---
   const median = getMedian(allMasses);
@@ -382,7 +551,7 @@ function drawBars(upToBin, showGuessLine) {
   histCtx.textAlign = 'center';
   histCtx.textBaseline = 'bottom';
 
-  const refLabels = { 'ref-coin': 'Coin ~5g', 'ref-brick': 'Brick ~2kg', 'ref-car': 'Car ~15000kg', 'ref-boulder': 'Boulder ~60000kg' };
+  const refLabels = { 'ref-coin': 'Coin', 'ref-brick': 'Brick', 'ref-car': 'Car', 'ref-boulder': 'Boulder' };
   Object.entries(referencePoints).forEach(([id, grams]) => {
     const x = leftPad + (gramsToPercent(grams) / 100) * chartW;
     histCtx.beginPath();
