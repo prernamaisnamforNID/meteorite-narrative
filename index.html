@@ -1,1 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>I pictured a boulder. It's usually a coin.</title>
+<link rel="stylesheet" href="story.css">
+</head>
+<body>
 
+<!-- ===================================================
+     FRAME 1a — Title (occupies its own full page)
+     =================================================== -->
+<section class="frame" id="frame-1a" data-frame="1a">
+  <div class="page title-page">
+    <h1 class="headline">What I got wrong about the size of the meteorites</h1>
+    <p class="scroll-hint">scroll</p>
+  </div>
+</section>
+
+<!-- ===================================================
+     FRAME 1b — The dinosaur hook
+     =================================================== -->
+<section class="frame" id="frame-1b" data-frame="1b">
+  <div class="page">
+    <div class="beat">
+      <p>When I was a kid, I learned about the meteorite that wiped out the dinosaurs. Ever since, that's what "meteorite" has meant to me — a world-ending boulder crashing down in fire.<br>Is that what most meteorites actually look like?</p>
+    </div>
+    <div class="beat">
+      <p>Before I answer that, let's back up. What actually is a meteorite?</p>
+    </div>
+
+    <!-- illustration placeholder — swap for your real image later -->
+    <div class="illustration-placeholder">[ dinosaur-era illustration goes here ]</div>
+  </div>
+</section>
+
+<!-- ===================================================
+     FRAME 2 — Familiarization (sticky visual + scrolling cards)
+     The left side (.scrolly-visual) stays PINNED in place via
+     CSS position:sticky while the reader scrolls past the three
+     cards on the right. Only one of the three .visual-state
+     divs is visible at a time — story.js swaps which one based
+     on which card is currently in view.
+     =================================================== -->
+<section class="frame frame-scrolly" id="frame-2" data-frame="2">
+
+  <div class="scrolly-visual">
+    <div class="visual-state" data-state="meteoroid">[ image: meteoroid ]</div>
+    <div class="visual-state" data-state="meteor">[ image: meteor ]</div>
+    <div class="visual-state" data-state="meteorite">[ image: meteorite ]</div>
+  </div>
+
+  <div class="scrolly-text">
+    <div class="beat-card" data-state="meteoroid">
+      <p><strong>Meteoroid.</strong> Out in space, it's called a meteoroid — a chunk of rock or metal drifting through the solar system, sometimes for billions of years.</p>
+    </div>
+    <div class="beat-card" data-state="meteor">
+      <p><strong>Meteor.</strong> The moment it hits Earth's atmosphere, it becomes a meteor — what you'd call a shooting star. Most burn up completely and never reach the ground.</p>
+    </div>
+    <div class="beat-card" data-state="meteorite">
+      <p><strong>Meteorite.</strong> If any part survives the fall and lands, that surviving piece is a meteorite. This story is about the survivors.</p>
+    </div>
+  </div>
+
+</section>
+
+<!-- ===================================================
+     FRAME 2b — image carousel (viewport-locked; the frame
+     pins in place while the browser's own scroll advances
+     through 3 states, sliding the image track horizontally —
+     same "pin + page-scroll-drives-it" mechanism as Frame 2,
+     just horizontal instead of vertical, and there's only
+     ONE visible box instead of two side-by-side columns.
+     =================================================== -->
+<section class="frame frame-carousel" id="frame-2b" data-frame="2b">
+
+  <div class="carousel-sticky">
+
+    <div class="beat carousel-intro">
+      <p>So that's what a meteorite is. But here's the thing — before I ever looked at real data, I already had a picture in my head of what one looks like.</p>
+    </div>
+
+    <div class="carousel-viewport">
+      <div class="carousel-track">
+
+        <div class="carousel-slide">
+          <div class="sticky-note">Massive rocks.</div>
+          <div class="carousel-image">[ image: massive historic meteorite photo ]</div>
+          <p class="image-source">Source: [url]</p>
+        </div>
+
+        <div class="carousel-slide">
+          <div class="sticky-note">Museum-piece boulders.</div>
+          <div class="carousel-image">[ image: museum-piece boulder ]</div>
+          <p class="image-source">Source: [url]</p>
+        </div>
+
+        <div class="carousel-slide">
+          <div class="sticky-note">Things that leave craters.</div>
+          <div class="carousel-image">[ image: crater-forming impact ]</div>
+          <p class="image-source">Source: [url]</p>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="carousel-dots">
+      <span class="dot" data-dot="0"></span>
+      <span class="dot" data-dot="1"></span>
+      <span class="dot" data-dot="2"></span>
+    </div>
+
+  </div>
+
+  <!-- invisible scroll triggers — pure scroll-height, no visible
+       content. Each one becoming visible tells story.js which
+       slide index should be active. -->
+  <div class="carousel-triggers">
+    <div class="carousel-trigger" data-index="0"></div>
+    <div class="carousel-trigger" data-index="1"></div>
+    <div class="carousel-trigger" data-index="2"></div>
+  </div>
+
+</section>
+
+<!-- ===================================================
+     FRAME 3 — Make-a-Guess
+     =================================================== -->
+<section class="frame" id="frame-3" data-frame="3">
+  <div class="page">
+    <div class="eyebrow">Fig. 3 — Before I looked</div>
+
+    <div class="beat">
+      <p>Massive rocks. Museum-piece boulders. Things that leave craters.</p>
+    </div>
+    <div class="beat">
+      <p>Picture a meteorite in your head right now. Not any specific one — just your gut image of one. How heavy is it?</p>
+    </div>
+
+    <!-- ===================================================
+         WEIGHT-GUESS TOOL
+         A horizontal log-scale axis (0.01g to 60,000,000g —
+         your real data's true min/max) with 4 dashed reference
+         lines (Coin/Brick/Car/Boulder) and a draggable vertical
+         marker the reader positions to represent their guess.
+         Built on a native <input type="range">, restyled so
+         its thumb LOOKS like the vertical pink line from the
+         mockup — not a visible slider, functionally one.
+         =================================================== -->
+    <div class="guess-tool">
+
+      <p class="guess-readout">Drag to make a guess: <span id="guess-value">—</span></p>
+
+      <div class="guess-axis">
+
+        <!-- reference lines — pure visual anchors, not selectable -->
+        <div class="ref-line" id="ref-coin">
+          <span class="ref-label">Coin<br>~5g</span>
+        </div>
+        <div class="ref-line" id="ref-brick">
+          <span class="ref-label">A brick<br>~2kg</span>
+        </div>
+        <div class="ref-line" id="ref-car">
+          <span class="ref-label">A car<br>~1.5t</span>
+        </div>
+        <div class="ref-line" id="ref-boulder">
+          <span class="ref-label">A boulder<br>~60t</span>
+        </div>
+
+        <!-- the actual draggable control -->
+        <input type="range" min="0" max="1000" step="1" value="500" id="guess-slider">
+
+        <!-- axis baseline + power-of-ten tick labels -->
+        <div class="axis-baseline"></div>
+        <div class="axis-ticks">
+          <span>10<sup>-2</sup></span>
+          <span>10<sup>0</sup></span>
+          <span>10<sup>2</sup></span>
+          <span>10<sup>4</sup></span>
+          <span>10<sup>6</sup></span>
+          <span>10<sup>8</sup></span>
+        </div>
+
+      </div>
+
+      <button id="check-results-btn" class="check-results-btn">Check results →</button>
+
+    </div>
+
+    <div class="page-number">3</div>
+  </div>
+</section>
+
+<!-- ===================================================
+     FRAME 4 — The Reveal
+     =================================================== -->
+<section class="frame" id="frame-4" data-frame="4">
+  <div class="page">
+    <div class="eyebrow">Fig. 4 — The record</div>
+
+    <div class="beat">
+      <p>Let's see how that compares to what's actually out there.</p>
+    </div>
+    <div class="beat">
+      <p>Here's what's really in the record.</p>
+    </div>
+
+    <!-- chart section — deliberately wider than the normal 640px
+         text column, since a bigger chart needs more room than
+         a paragraph of prose does -->
+    <div class="histogram-section">
+
+      <div class="histogram-main">
+        <p class="axis-label-y">Number of meteorites</p>
+
+        <!-- canvas is used (not SVG) since this may render tens
+             of thousands of individual data points binned into
+             bars; canvas handles that volume far better -->
+        <canvas id="mass-histogram"></canvas>
+
+        <div class="axis-baseline-h"></div>
+        <div class="axis-ticks-h">
+          <span>10<sup>-2</sup></span>
+          <span>10<sup>0</sup></span>
+          <span>10<sup>2</sup></span>
+          <span>10<sup>4</sup></span>
+          <span>10<sup>6</sup></span>
+          <span>10<sup>8</sup></span>
+        </div>
+        <p class="axis-label-x">Mass (grams, log scale)</p>
+      </div>
+
+      <!-- hidden until the bar reveal finishes — story.js adds
+           .is-visible once the animation completes, per the
+           "graph first, then text" sequencing you asked for -->
+      <div class="guess-callout" id="guess-callout">
+        <p>Your guess was <strong id="reveal-guess">—</strong></p>
+        <p id="stat-callout">—</p>
+      </div>
+
+    </div>
+
+    <div class="page-number">4</div>
+  </div>
+</section>
+
+<!-- ===================================================
+     FRAME 5 — The Mechanism + The Bookend
+     =================================================== -->
+<section class="frame" id="frame-5" data-frame="5">
+  <div class="page">
+    <div class="eyebrow">Fig. 5 — So where did I go wrong?</div>
+
+    <div class="beat">
+      <p>Most entries in this record aren't chance discoveries. They're the result of deliberate searches — trained teams combing deserts and ice fields, looking specifically for anything that doesn't belong. That kind of search finds the small stuff. A person just glancing at the sky never will.</p>
+    </div>
+
+    <div class="beat">
+      <p>So — is that what most meteorites actually look like? Not even close.</p>
+    </div>
+
+    <div class="stat-highlight">
+      <p><strong id="brick-pct">—</strong>% of recorded meteorites are lighter than a brick.</p>
+    </div>
+
+    <div class="beat">
+      <p>Most are closer to a coin than a boulder.</p>
+    </div>
+
+    <div class="page-number">5</div>
+  </div>
+</section>
+
+<!-- ===================================================
+     FRAME 6 — The Extremes
+     =================================================== -->
+<section class="frame" id="frame-6" data-frame="6">
+  <div class="page">
+    <div class="eyebrow">Fig. 6 — But some really are that big</div>
+
+    <div class="beat">
+      <p>But some really are as big as I imagined.</p>
+    </div>
+
+    <div class="beat">
+      <p>Hoba, the heaviest meteorite ever recorded, weighs about <strong id="hoba-multiplier">—</strong> times the median meteorite in this dataset.</p>
+    </div>
+
+    <div class="extremes-axis-wrap">
+      <div class="extremes-axis">
+        <div class="extreme-marker" id="marker-median">
+          <span class="extreme-dot"></span>
+          <span class="extreme-label">Median<br><span id="median-value-label">—</span></span>
+        </div>
+        <div class="extreme-marker" id="marker-hoba">
+          <span class="extreme-dot"></span>
+          <span class="extreme-label">Hoba<br>60,000,000 g</span>
+        </div>
+        <div class="extremes-baseline"></div>
+      </div>
+    </div>
+
+    <div class="page-number">6</div>
+  </div>
+</section>
+
+<!-- ===================================================
+     FRAME 7 — Close the Loop
+     =================================================== -->
+<section class="frame" id="frame-7" data-frame="7">
+  <div class="page">
+    <div class="eyebrow">Fig. 7 — See for yourself</div>
+
+    <div class="beat">
+      <p>See for yourself. Every meteorite ever recorded is on the map below.</p>
+    </div>
+
+    <a href="map.html" class="explore-link">Explore the map →</a>
+
+    <div class="page-number">7</div>
+  </div>
+</section>
+
+<script src="story.js"></script>
+</body>
+</html>

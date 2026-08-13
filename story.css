@@ -1,0 +1,673 @@
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: #FFFFFF;
+  font-family: Helvetica, Arial, sans-serif;
+  color: #222;
+}
+
+/* ---------------------------------------------------------
+   Each frame is a full-height scroll section. The .page itself
+   now fills the ENTIRE frame edge-to-edge (full-bleed white,
+   border sitting right at the viewport edge) — not a smaller
+   card floating on a gray backdrop, which is what this was
+   doing before. Long lines of text are kept readable via a
+   max-width on the text elements themselves (see .headline,
+   .beat p below), not on the page/border.
+   --------------------------------------------------------- */
+.frame {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.page {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  background: #FFFFFF;
+  border: 1px solid #1C1C1C;
+  padding: 48px 44px 36px;
+  box-sizing: border-box;
+}
+
+/* ---------------------------------------------------------
+   FRAME 2 — sticky visual + page-scrolling cards.
+   The MAIN PAGE scroll drives everything here — there is no
+   separate/nested scroll region. .scrolly-visual pins itself
+   on screen via position: sticky while the page scrolls past
+   it; .scrolly-text is intentionally taller than one screen
+   (3 stacked 100vh cards, in normal document flow) so there's
+   real distance for the page to scroll through, which is what
+   makes each card scroll up and out while the next scrolls in.
+   align-items: flex-start (overriding .frame's default
+   align-items: center) is required — sticky does not work
+   correctly inside a flex container that centers its items.
+   --------------------------------------------------------- */
+.frame-scrolly {
+  align-items: flex-start;
+  min-height: 0;
+}
+
+.scrolly-visual {
+  position: sticky;
+  top: 0;
+  width: 50%;
+  height: 100vh;
+  background: #F7F7F5;
+  border-right: 1px solid #1C1C1C;
+}
+
+/* all three states stack exactly on top of each other, centered
+   in the box — only the .is-active one is visible.
+   story.js toggles which one has that class. */
+.visual-state {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  color: #888;
+  font-size: 14px;
+  text-align: center;
+  padding: 20px;
+}
+
+.visual-state.is-active {
+  opacity: 1;
+}
+
+.scrolly-text {
+  width: 50%;
+}
+
+/* each card is a full screen tall — scrolling exactly one
+   screen's worth of distance moves you from one card to the
+   next, which is what makes the previous card scroll fully
+   away before the next one arrives, rather than a quick
+   flicker between them. */
+.beat-card {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  padding: 0 60px;
+}
+
+.beat-card p {
+  background: #FAFA9E;
+  border-radius: 16px;
+  padding: 24px 28px;
+  font-size: 16px;
+  line-height: 1.6;
+  color: #222;
+  margin: 0;
+  max-width: 420px;
+}
+
+.beat-card strong {
+  font-weight: 700;
+}
+
+/* ---------------------------------------------------------
+   FRAME 2b — image carousel, viewport-locked.
+   Same pinning principle as Frame 2 (position: sticky on a
+   box, extra height elsewhere to scroll through) but simpler:
+   single column, no left/right split. .frame-carousel must
+   override .frame's default display:flex (which would put
+   its children SIDE BY SIDE in a row) back to plain block
+   stacking, so .carousel-sticky sits on top and
+   .carousel-triggers sits below it in normal flow.
+   --------------------------------------------------------- */
+.frame-carousel {
+  display: block;
+  min-height: 0;
+}
+
+.carousel-sticky {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #FFFFFF;
+}
+
+.carousel-intro {
+  max-width: 500px;
+  margin-bottom: 32px;
+}
+
+/* the "window" — clips the track so only one slide's worth
+   is ever visible at once */
+.carousel-viewport {
+  width: 100%;
+  max-width: 500px;
+  overflow: hidden;
+}
+
+/* holds all 3 slides side by side — 300% wide because it
+   contains three 100%-wide slides. Sliding by -33.3333% of
+   ITS OWN width moves exactly one slide's worth, since
+   percentages in a transform are relative to the element
+   itself, not the viewport. story.js sets data-active on
+   this element; the three rules below do the actual moving. */
+.carousel-track {
+  display: flex;
+  width: 300%;
+  transition: transform 0.5s ease;
+}
+
+.carousel-track[data-active="0"] { transform: translateX(0%); }
+.carousel-track[data-active="1"] { transform: translateX(-33.3333%); }
+.carousel-track[data-active="2"] { transform: translateX(-66.6667%); }
+
+.carousel-slide {
+  width: 33.3333%;
+  flex-shrink: 0;
+  padding: 0 10px;
+  box-sizing: border-box;
+}
+
+.carousel-image {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  border: 1px dashed #999;
+  background: #F7F7F5;
+  color: #888;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 12px;
+  box-sizing: border-box;
+}
+
+.image-source {
+  font-style: italic;
+  font-size: 12px;
+  color: #888;
+  margin: 8px 0 0;
+}
+
+/* the rotated yellow "sticky note" caption, matching the
+   mockup — sits visually on top of the image's corner */
+.sticky-note {
+  background: #FAFA9E;
+  display: inline-block;
+  padding: 10px 16px;
+  border-radius: 4px;
+  transform: rotate(-4deg);
+  font-size: 14px;
+  color: #222;
+  margin-bottom: -14px; /* pulls it down so it overlaps the image slightly */
+  position: relative;
+  z-index: 1;
+  box-shadow: 1px 2px 4px rgba(0,0,0,0.1);
+}
+
+.carousel-dots {
+  display: flex;
+  gap: 8px;
+  margin-top: 24px;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ccc;
+  transition: background 0.3s ease;
+}
+
+.dot.is-active {
+  background: #F5D90A;
+}
+
+/* invisible — pure scroll height, no visible content.
+   Three of these give the page extra distance to scroll
+   through while .carousel-sticky stays pinned above them.
+   Lower this value = less physical scrolling per image =
+   faster-feeling carousel. Raise it for slower/more deliberate. */
+.carousel-trigger {
+  height: 60vh;
+}
+
+.eyebrow {
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #666;
+  margin-bottom: 10px;
+}
+
+.headline {
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1.3;
+  margin: 0 auto 14px;
+  max-width: 640px;
+  color: #111;
+}
+
+/* ---------------------------------------------------------
+   Title page (Frame 1a only) — headline sits alone, vertically
+   centered. .page already fills the full viewport now, so this
+   just adds flex centering on top of that, no separate height.
+   --------------------------------------------------------- */
+.title-page {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+}
+
+.title-page .headline {
+  font-size: 36px;
+}
+
+.scroll-hint {
+  font-style: italic;
+  font-size: 14px;
+  color: #888;
+  margin-top: 60px;
+}
+
+/* illustration placeholder — taller and plainer than the
+   chart/interaction placeholder-box, since it'll eventually
+   hold a full image rather than a small UI element */
+.illustration-placeholder {
+  border: 1px dashed #999;
+  color: #888;
+  font-size: 13px;
+  text-align: center;
+  padding: 100px 16px;
+  margin: 32px auto 0;
+  max-width: 640px;
+  background: #F7F7F5;
+}
+
+.subtitle {
+  font-size: 15px;
+  color: #444;
+  margin: 0 auto 32px;
+  max-width: 640px;
+  line-height: 1.6;
+}
+
+.beat {
+  margin: 0 auto 22px;
+  max-width: 640px;
+}
+
+.beat p {
+  font-size: 15px;
+  line-height: 1.75;
+  margin: 0;
+  color: #222;
+}
+
+.beat strong {
+  font-weight: 700;
+  color: #111;
+}
+
+.fillin {
+  color: #3F6B6B;
+  font-weight: 700;
+}
+
+/* placeholder for not-yet-built interactive/chart elements —
+   purely a visual stand-in during the skeleton phase, gets
+   replaced section by section */
+.placeholder-box {
+  border: 1px dashed #999;
+  color: #888;
+  font-size: 13px;
+  text-align: center;
+  padding: 40px 16px;
+  margin: 24px auto;
+  max-width: 640px;
+  background: #F7F7F5;
+}
+
+.page-number {
+  text-align: center;
+  font-size: 11px;
+  color: #999;
+  margin-top: 24px;
+}
+
+.explore-link {
+  display: block;
+  text-align: center;
+  margin-top: 32px;
+  font-size: 14px;
+  color: #3F6B6B;
+  text-decoration: none;
+  border-top: 1px solid #ddd;
+  padding-top: 20px;
+}
+
+.explore-link:hover {
+  text-decoration: underline;
+}
+
+/* ---------------------------------------------------------
+   FRAME 3 — weight-guess tool.
+   .ref-line elements get their horizontal position (left: X%)
+   set by JS, not here — the correct position depends on real
+   log-scale math against your actual data bounds, which only
+   JS can compute. CSS only handles what each piece LOOKS like.
+   --------------------------------------------------------- */
+.guess-tool {
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.guess-readout {
+  text-align: center;
+  font-size: 15px;
+  color: #444;
+  margin-bottom: 40px;
+}
+
+#guess-value {
+  color: #3F6B6B;
+  font-weight: 700;
+}
+
+.guess-axis {
+  position: relative;
+  height: 260px;
+  margin: 0 20px 12px;
+}
+
+/* dashed reference lines (Coin/Brick/Car/Boulder) — purely
+   visual anchors, not interactive. transform: translateX(-50%)
+   centers each line exactly ON its computed position, rather
+   than starting the line AT that position. */
+.ref-line {
+  position: absolute;
+  top: 30px;
+  bottom: 30px;
+  width: 0;
+  border-left: 2px dashed #E85D9C;
+  transform: translateX(-50%);
+}
+
+.ref-label {
+  position: absolute;
+  top: -34px;
+  left: 0;
+  transform: translateX(-50%);
+  font-size: 12px;
+  line-height: 1.3;
+  color: #333;
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* the native slider — track hidden, thumb restyled to look
+   like a solid vertical line matching the dashed reference
+   lines, not a normal circular thumb */
+#guess-slider {
+  position: absolute;
+  top: 30px;
+  bottom: 30px;
+  left: 0;
+  width: 100%;
+  height: auto;
+  margin: 0;
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+#guess-slider::-webkit-slider-runnable-track {
+  background: transparent;
+  height: 100%;
+}
+
+#guess-slider::-moz-range-track {
+  background: transparent;
+  height: 100%;
+}
+
+#guess-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 3px;
+  height: 200px;
+  background: #E85D9C;
+  cursor: pointer;
+  border-radius: 0;
+}
+
+#guess-slider::-moz-range-thumb {
+  width: 3px;
+  height: 200px;
+  background: #E85D9C;
+  cursor: pointer;
+  border: none;
+  border-radius: 0;
+}
+
+.axis-baseline {
+  position: absolute;
+  bottom: 30px;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: #1C1C1C;
+}
+
+.axis-ticks {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #888;
+}
+
+.check-results-btn {
+  display: block;
+  margin: 24px auto 0;
+  padding: 10px 24px;
+  background: #FAFA9E;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: Helvetica, Arial, sans-serif;
+  color: #222;
+  cursor: pointer;
+}
+
+.check-results-btn:hover {
+  background: #F5D90A;
+}
+
+/* ---------------------------------------------------------
+   FRAME 4 — mass histogram.
+   .guess-callout uses position: absolute, floating OUTSIDE
+   .histogram-main's own centered column — this is what keeps
+   the chart itself perfectly centered at all times, whether
+   the callout is hidden or visible. (Previously it sat in the
+   same flex row and reserved its 240px of space even while
+   invisible, which is what was pushing the chart off-center.)
+   --------------------------------------------------------- */
+.histogram-section {
+  position: relative;
+  max-width: 640px;
+  margin: 32px auto 0;
+}
+
+.histogram-main {
+  width: 100%;
+  min-width: 320px;
+}
+
+.axis-label-y {
+  font-size: 12px;
+  color: #666;
+  margin: 0 0 8px;
+}
+
+#mass-histogram {
+  width: 100%;
+  height: 380px;
+  display: block;
+}
+
+.axis-baseline-h {
+  height: 1px;
+  background: #1C1C1C;
+  margin-top: 4px;
+  margin-left: 44px; /* matches the canvas's leftPad, so this lines up with the actual chart area */
+}
+
+.axis-ticks-h {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #888;
+  margin-top: 6px;
+  margin-left: 44px; /* same reasoning as .axis-baseline-h above */
+}
+
+.axis-label-x {
+  text-align: center;
+  font-size: 12px;
+  color: #666;
+  margin: 10px 0 0;
+}
+
+/* hidden until story.js adds .is-visible, once the bar reveal
+   finishes — this is the "graph first, then text" sequencing.
+   position: absolute + left: 100% floats it to the right of
+   .histogram-main, OUTSIDE the normal document flow, so it
+   never affects the chart's own centering. */
+.guess-callout {
+  position: absolute;
+  top: 50%;
+  left: 100%;
+  margin-left: 24px;
+  transform: translateY(-50%) translateX(8px);
+  width: 240px;
+  background: #FAFA9E;
+  border-radius: 10px;
+  padding: 20px;
+  opacity: 0;
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.guess-callout.is-visible {
+  opacity: 1;
+  transform: translateY(-50%) translateX(0);
+}
+
+.guess-callout p {
+  margin: 0 0 8px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #222;
+}
+
+.guess-callout p:last-child {
+  margin-bottom: 0;
+}
+
+/* ---------------------------------------------------------
+   FRAME 5 — standalone stat callout. Simpler than
+   .guess-callout — no absolute positioning, no hide/reveal
+   state, just a centered highlight box in normal text flow.
+   --------------------------------------------------------- */
+.stat-highlight {
+  max-width: 400px;
+  margin: 24px auto;
+  padding: 20px;
+  background: #FAFA9E;
+  border-radius: 10px;
+  text-align: center;
+}
+
+.stat-highlight p {
+  margin: 0;
+  font-size: 16px;
+  color: #222;
+}
+
+.stat-highlight strong {
+  color: #3F6B6B;
+  font-size: 22px;
+}
+
+/* ---------------------------------------------------------
+   FRAME 6 — extremes axis (Median vs. Hoba).
+   Padding on the OUTER wrapper (not the inner axis) gives the
+   two edge markers — Median sits mid-way, Hoba sits at the
+   very far right (100%) — room for their labels to overflow
+   into that padding without getting clipped at the boundary,
+   same issue we fixed for Frame 4's canvas labels earlier.
+   --------------------------------------------------------- */
+.extremes-axis-wrap {
+  max-width: 640px;
+  margin: 32px auto 0;
+  padding: 0 50px;
+  box-sizing: border-box;
+}
+
+.extremes-axis {
+  position: relative;
+  height: 90px;
+}
+
+.extreme-marker {
+  position: absolute;
+  bottom: 0;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column-reverse; /* dot (first in HTML) sits at the bottom, label floats above it */
+  align-items: center;
+}
+
+.extreme-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #E85D9C;
+  margin-top: 8px;
+}
+
+.extreme-label {
+  font-size: 12px;
+  line-height: 1.4;
+  color: #333;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.extremes-baseline {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: #1C1C1C;
+}
+
+#reveal-guess {
+  color: #3F6B6B;
+}
