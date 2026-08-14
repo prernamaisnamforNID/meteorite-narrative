@@ -329,6 +329,13 @@ html, body {
   background: #F7F7F5;
 }
 
+.illustration-placeholder img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
 .subtitle {
   font-size: 15px;
   color: #444;
