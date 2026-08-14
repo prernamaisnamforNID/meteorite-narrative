@@ -43,6 +43,7 @@ const carouselTriggers = document.querySelectorAll(".carousel-trigger");
 const carouselTrack = document.querySelector(".carousel-track");
 const dots = document.querySelectorAll(".dot");
 
+//added this
 const carouselObserver = new IntersectionObserver((entries) => {
   entries.forEach(entry => {
     if (!entry.isIntersecting) return;
