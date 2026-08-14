@@ -39,11 +39,6 @@
 
 <!-- ===================================================
      FRAME 2 — Familiarization (sticky visual + scrolling cards)
-     The left side (.scrolly-visual) stays PINNED in place via
-     CSS position:sticky while the reader scrolls past the three
-     cards on the right. Only one of the three .visual-state
-     divs is visible at a time — story.js swaps which one based
-     on which card is currently in view.
      =================================================== -->
 <section class="frame frame-scrolly" id="frame-2" data-frame="2">
 
@@ -68,12 +63,7 @@
 </section>
 
 <!-- ===================================================
-     FRAME 2b — image carousel (viewport-locked; the frame
-     pins in place while the browser's own scroll advances
-     through 3 states, sliding the image track horizontally —
-     same "pin + page-scroll-drives-it" mechanism as Frame 2,
-     just horizontal instead of vertical, and there's only
-     ONE visible box instead of two side-by-side columns.
+     FRAME 2b — image carousel
      =================================================== -->
 <section class="frame frame-carousel" id="frame-2b" data-frame="2b">
 
@@ -115,9 +105,6 @@
 
   </div>
 
-  <!-- invisible scroll triggers — pure scroll-height, no visible
-       content. Each one becoming visible tells story.js which
-       slide index should be active. -->
   <div class="carousel-triggers">
     <div class="carousel-trigger" data-index="0"></div>
     <div class="carousel-trigger" data-index="1"></div>
@@ -135,23 +122,12 @@
       <p>Picture a meteorite in your head right now. Not any specific one — just your gut image of one. How heavy is it?</p>
     </div>
 
-    <!-- ===================================================
-         WEIGHT-GUESS TOOL
-         A horizontal log-scale axis (0.01g to 60,000,000g —
-         your real data's true min/max) with 4 dashed reference
-         lines (Coin/Brick/Car/Boulder) and a draggable vertical
-         marker the reader positions to represent their guess.
-         Built on a native <input type="range">, restyled so
-         its thumb LOOKS like the vertical pink line from the
-         mockup — not a visible slider, functionally one.
-         =================================================== -->
     <div class="guess-tool">
 
       <p class="guess-readout">Drag to make a guess: <span id="guess-value">—</span></p>
 
       <div class="guess-axis">
 
-        <!-- reference lines — pure visual anchors, not selectable -->
         <div class="ref-line" id="ref-coin">
           <span class="ref-label">Coin<br>~5g</span>
         </div>
@@ -165,10 +141,8 @@
           <span class="ref-label">A boulder<br>~60000kg</span>
         </div>
 
-        <!-- the actual draggable control -->
         <input type="range" min="0" max="1000" step="1" value="500" id="guess-slider">
 
-        <!-- axis baseline + power-of-ten tick labels -->
         <div class="axis-baseline"></div>
         <div class="axis-ticks">
           <span>10<sup>-2</sup></span>
@@ -199,19 +173,11 @@
       <p>Here's what's really in the record.</p>
     </div>
 
-    <!-- chart section — deliberately wider than the normal 640px
-         text column, since a bigger chart needs more room than
-         a paragraph of prose does -->
     <div class="histogram-section">
 
       <div class="histogram-main">
         <p class="axis-label-y">Number of meteorites</p>
-
-        <!-- canvas is used (not SVG) since this may render tens
-             of thousands of individual data points binned into
-             bars; canvas handles that volume far better -->
         <canvas id="mass-histogram"></canvas>
-
         <div class="axis-baseline-h"></div>
         <div class="axis-ticks-h">
           <span>10<sup>-2</sup></span>
@@ -224,25 +190,23 @@
         <p class="axis-label-x">Mass (grams, log scale)</p>
       </div>
 
-      <!-- hidden until the bar reveal finishes — story.js adds
-           .is-visible once the animation completes, per the
-           "graph first, then text" sequencing you asked for -->
       <div class="guess-callout" id="guess-callout">
         <p>Your guess was <strong id="reveal-guess">—</strong></p>
         <p id="stat-callout">—</p>
       </div>
 
     </div>
+
+    <div class="page-number">4</div>
   </div>
 </section>
 
 <!-- ===================================================
-     FRAME 5 — The Mechanism + The Bookend
-     Independent second chart, zoomed to the smallest-to-Brick
-     range only — same visual language as Frame 4 (same axis
-     style, same card position) so the transition READS as
-     "same graph, zoomed in," even though it's technically a
-     separate canvas, not a shared/animated one.
+     FRAME 5 — The Mechanism + The Bookend.
+     Uses the SAME shared drawHistogram() function as Frame 4
+     (see story.js) — not a separate re-implementation — so
+     this is guaranteed to be pixel-identical to Frame 4,
+     just with bars colored below the Brick threshold.
      =================================================== -->
 <section class="frame" id="frame-5" data-frame="5">
   <div class="page">
@@ -261,17 +225,17 @@
         <p class="axis-label-y">Number of meteorites</p>
         <canvas id="mass-histogram-zoom"></canvas>
         <div class="axis-baseline-h"></div>
-        <div class="axis-ticks-h" id="axis-ticks-zoom">
-          <!-- filled by story.js — this chart's range is much
-               narrower than Frame 4's, so it needs its own
-               tick values, not the same 10^-2...10^8 spread -->
+        <div class="axis-ticks-h">
+          <span>10<sup>-2</sup></span>
+          <span>10<sup>0</sup></span>
+          <span>10<sup>2</sup></span>
+          <span>10<sup>4</sup></span>
+          <span>10<sup>6</sup></span>
+          <span>10<sup>8</sup></span>
         </div>
         <p class="axis-label-x">Mass (grams, log scale)</p>
       </div>
 
-      <!-- same class, same absolute positioning as Frame 4's
-           card — reusing .guess-callout is what guarantees
-           this lands in the exact same screen position -->
       <div class="guess-callout is-visible" id="brick-callout">
         <p><strong id="brick-pct-2">—</strong>% of recorded meteorites are lighter than a brick.</p>
       </div>
@@ -280,7 +244,6 @@
 
     <p class="chart-hint">Click the leftmost bar to see the smallest meteorite ever recorded.</p>
 
-    <!-- small popup, hidden until the leftmost bar is clicked -->
     <div class="smallest-popup" id="smallest-popup">
       <p><strong>LaPaz Icefield 04531</strong></p>
       <p>0.01 g — the lightest meteorite ever recorded.</p>
