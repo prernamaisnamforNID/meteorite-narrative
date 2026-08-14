@@ -551,7 +551,7 @@ function drawBars(upToBin, showGuessLine) {
   histCtx.textAlign = 'center';
   histCtx.textBaseline = 'bottom';
 
-  const refLabels = { 'ref-coin': 'Coin', 'ref-brick': 'Brick', 'ref-car': 'Car', 'ref-boulder': 'Boulder' };
+  const refLabels = { 'ref-coin': 'Coin ~5g', 'ref-brick': 'Brick ~2kg', 'ref-car': 'Car ~1500kg', 'ref-boulder': 'Boulder ~60000kg' };
   Object.entries(referencePoints).forEach(([id, grams]) => {
     const x = leftPad + (gramsToPercent(grams) / 100) * chartW;
     histCtx.beginPath();
